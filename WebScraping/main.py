@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 
 class Robot:
     """
-    A robot that runs the automated web scraping.
+    A robot that scrapes a specified news outlet e.g. CBC and sends the top messages. 
+    Only use the run function.
     """
 
     def __init__(self, from_email: str, to_email: str, password: str):
@@ -26,7 +27,7 @@ class Robot:
         self._from_email = from_email
         self._password = password
 
-    def compose_message(self, content: str):
+    def _compose_message(self, content: str):
         """
         Composes an email with the given content and send it to the email address specified in the .env file.
 
@@ -40,7 +41,7 @@ class Robot:
         message.attach(MIMEText(content, 'html'))
         return message
 
-    def send_email(self, message: MIMEMultipart):
+    def _send_email(self, message: MIMEMultipart):
         """
         Sends the message to the specified email address on the Robot private variables.
 
@@ -56,27 +57,31 @@ class Robot:
             connection.quit()
 
     @staticmethod
-    def scrape(url: str):
+    def _scrape(url: str, web_filter: dict):
         """
         Scrapes the specified url and returns the content.
 
         :param url: the url to be scraped, a string
+        :param web_filter: the filter to be applied to the scraped content, a dictionary
         """
         content = f"<b> Canadian CBC News Top Stories: </b> <br> {'-' * 50} <br>"
         soup = web_scraper.scrape(url)
-        for i, tag in enumerate(soup.find_all("h3", attrs={"class": "headline"}), start=1):
+        for i, tag in enumerate(soup.find_all("h3", attrs=web_filter), start=1):
             content += f"{i} :: {tag.text} \n <br>"
         content += "<br> <br> <b> This email was sent by a robot. End of Message </b>"
         return content
 
-    def run(self, url: str):
+    def run(self, url: str, web_filter: dict):
         """
         Runs the robot. Scraping the specified url and sending the email.
+
+        :param url: the url to be scraped, a string
+        :param web_filter: the filter to be applied to the scraped content, a dictionary
         """
         print("Running the robot...")
-        content = self.scrape(url)
-        message = self.compose_message(content)
-        self.send_email(message)
+        content = self._scrape(url, web_filter)
+        message = self._compose_message(content)
+        self._send_email(message)
         print("Robot has finished running.")
 
 
@@ -87,7 +92,8 @@ def main():
     password = os.getenv("PASSWORD")
     robot = Robot(from_email, to_email, password)
     url = "https://www.cbc.ca/news/canada"
-    robot.run(url)
+    web_filter = {"class": "headline"}
+    robot.run(url, web_filter)
 
 
 if __name__ == '__main__':
