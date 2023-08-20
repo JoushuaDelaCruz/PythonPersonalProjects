@@ -25,6 +25,22 @@ class Summarizer:
         self._setup_openai()
         self._setup_nlp()
 
+    @property
+    def text(self) -> str:
+        """
+        Returns the text to summarize.
+        """
+        return self._data
+
+    @text.setter
+    def text(self, text: str) -> None:
+        """
+        Sets the text to summarize.
+
+        param text: the text to summarize, a string
+        """
+        self._data = text
+
     @staticmethod
     def _setup_openai():
         """
@@ -37,7 +53,7 @@ class Summarizer:
         """
         Summarize the text given to the class using the OpenAI engine by getting the top 10 sentences
         """
-        top_sentences = self._top_n_sentences()
+        top_sentences = self._top_n_sentences(15)
         joined_sentences = self._join_sentences(top_sentences)
         summary = self._openai_request(joined_sentences)
         return summary
@@ -61,10 +77,10 @@ class Summarizer:
         """
         response = openai.Completion.create(
             engine=self._engine,
-            prompt=f"Using the top 10 rank sentences from a document. Summarize the document: \n {sentences}",
+            prompt=f"Using the top 10 rank sentences from a document. Summarize it: \n {sentences}",
             max_tokens=self._max_tokens,
         )
-        return response.choices[0].text.strip()
+        return response.choices[0].text
 
     @classmethod
     def _setup_nlp(cls) -> None:
@@ -74,7 +90,7 @@ class Summarizer:
         cls._nlp = spacy.load("en_core_web_lg")
         cls._nlp.add_pipe("textrank")
 
-    def _top_n_sentences(self, n: int = 10) -> list[str]:
+    def _top_n_sentences(self, n: int) -> list[str]:
         """
         Returns the top n sentences from a given text.
 
@@ -83,5 +99,5 @@ class Summarizer:
         """
         doc = self._nlp(self._data)
         top_sentences = [sentence for sentence in doc._.textrank.summary(
-            limit_phrases=2, limit_sentences=n)]
+            limit_phrases=5, limit_sentences=n)]
         return top_sentences
