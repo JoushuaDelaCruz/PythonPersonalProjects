@@ -1,15 +1,14 @@
-from summarizer import Summarizer
+from pdf_reader import PDFReader
 from text_filter import ExcessiveNewlinesFilter
+from summarizer import Summarizer
 
 
 def main():
-    data = ""
-    with open("dilemma_sample.txt", "r", encoding="utf8") as text:
-        for line in text:
-            data += line
-    data = ExcessiveNewlinesFilter.strain(data)
-    summarizer = Summarizer(data)
-    print(summarizer.summarize())
+    reader = PDFReader()
+    content = reader.read("psychological_sample.pdf")
+    summarizer = Summarizer(content)
+    summary = summarizer.summarize()
+    print(summary.strip())
 
 
 if __name__ == "__main__":
