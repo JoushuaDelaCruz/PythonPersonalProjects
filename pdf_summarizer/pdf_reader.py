@@ -16,7 +16,6 @@ class TextReader(abc.ABC):
         Initialises the file and content private variables
         """
         self._file: str = ""
-        self._content: str = ""
 
     @abc.abstractmethod
     def read(self, file_path: str) -> str:
@@ -53,8 +52,8 @@ class PDFReader(TextReader):
         """
         self._file = file_path
         self._check_file_type()
-        self._read_pdf()
-        return self._content
+        content = self._read_pdf()
+        return content
 
     def _check_file_type(self):
         """
@@ -65,7 +64,7 @@ class PDFReader(TextReader):
         if not self._file.endswith(".pdf"):
             raise TypeError("File must be a pdf file!")
 
-    def _read_pdf(self):
+    def _read_pdf(self) -> str:
         """
         Uses pyPDF2 to read the all text of the file. The file's text will all be
         stored in the content variable
@@ -74,17 +73,19 @@ class PDFReader(TextReader):
         """
         with open(self._file, 'rb') as pdf:
             reader = PdfReader(pdf, strict=False)
-            self._read_pages(reader)
+            return self._read_pages(reader)
 
-    def _read_pages(self, reader: PdfReader):
+    @staticmethod
+    def _read_pages(reader: PdfReader):
         """
         Reads text from each pages of a pdfFileReader
 
         @param reader: A PdfFileReader to read each pages from
         """
+        content = ""
         for page in reader.pages:
-            content = page.extract_text()
-            self._content += content
+            content += page.extract_text()
+        return content
 
 
 class TextFileReader(TextReader):
@@ -102,8 +103,8 @@ class TextFileReader(TextReader):
         """
         self._file = file_path
         self._check_file_type()
-        self._read_txt()
-        return self._content
+        content = self._read_txt()
+        return content
 
     def _check_file_type(self):
         """
@@ -114,20 +115,23 @@ class TextFileReader(TextReader):
         if not self._file.endswith(".txt"):
             raise TypeError("File must be a text file!")
 
-    def _read_txt(self):
+    def _read_txt(self) -> str:
         """
-        Reads the content of the text and store all the text into the content variable.
+        Reads the content of the text.
 
         @raise FileNotFound: if the file cannot be found.
         """
         with open(self._file, encoding="utf8") as txt:
-            self._read_pages(txt)
+            return self._read_pages(txt)
 
-    def _read_pages(self, file: TextIO):
+    @staticmethod
+    def _read_pages(file: TextIO) -> str:
         """
-        Reads each pages of a given file and store all the text to the content variable.
+        Reads each pages of a given file.
 
         @param file: the file to read the pages from, TextIO
         """
+        content = ""
         for line in file:
-            self._content += line
+            content += line
+        return content
