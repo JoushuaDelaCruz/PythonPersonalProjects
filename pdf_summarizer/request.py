@@ -34,6 +34,31 @@ class Request:
         self._doc = new_doc
 
 
+def _setup_parser() -> ArgumentParser:
+    """
+    A helper that sets up the ArgumentParser for the commandline.
+
+    :return: an ArgumentParser
+    """
+    parser = ArgumentParser()
+    parser.add_argument("file",
+                        help="The file to summarize the text from. File can be pdf or txt file.")
+    return parser
+
+
+def _setup_request(parser: ArgumentParser) -> Request:
+    """
+    A helper that sets up the Request by using the input
+    from the commandline parser.
+
+    :return: a Request with the inputs
+    """
+    args = parser.parse_args()
+    request = Request()
+    request.document = args.inputfile
+    return request
+
+
 def setup_request_commandline() -> Request:
     """
     Implements the argparse module to accept arguments via commandline.
@@ -50,28 +75,3 @@ def setup_request_commandline() -> Request:
     except Exception as e:
         print(f"Error! Could not read arguments. \n {e}")
         quit()
-
-
-def _setup_parser() -> ArgumentParser:
-    """
-    A helper that sets up the ArgumentParser for the commandline.
-
-    :return: an ArgumentParser
-    """
-    parser = ArgumentParser()
-    parser.add_argument("-f", "--inputfile", default=None,
-                        help="The file to summarize the text from. File can be pdf or txt file.")
-    return parser
-
-
-def _setup_request(parser: ArgumentParser) -> Request:
-    """
-    A helper that sets up the Request by using the input
-    from the commandline parser.
-
-    :return: a Request with the inputs
-    """
-    args = parser.parse_args()
-    request = Request()
-    request.document = args.inputfile
-    return request
